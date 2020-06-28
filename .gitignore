@@ -1,3 +1,37 @@
+### JupyterNotebooks ###
+## gitignore template for Jupyter Notebooks
+## website: http://jupyter.org/
+
+
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# IPython
+profile_default/
+ipython_config.py
+
+### Vim ###
+## Swap
+[._]*.s[a-v][a-z]
+!*.svg  # comment out if you don't need vector files
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Session
+Session.vim
+Sessionx.vim
+
+# Temporary
+.netrwhist
+*~
+tags
+# Persistent undo
+[._]*.un~
+
+# End of https://www.toptal.com/developers/gitignore/api/jupyternotebooks,vim
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
