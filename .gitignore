@@ -3,6 +3,8 @@
 ## website: http://jupyter.org/
 Roberta*/
 runs/
+cache*/
+notebooks-donut/
 
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
