@@ -1,6 +1,7 @@
 ### JupyterNotebooks ###
 ## gitignore template for Jupyter Notebooks
 ## website: http://jupyter.org/
+OriginalBert*/
 Roberta*/
 runs/
 cache*/
