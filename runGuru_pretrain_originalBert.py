@@ -24,13 +24,21 @@ from multiprocessing import Pool
 from functools import reduce
 
 
+# Suggested Parsing from https://pytorch.org/docs/stable/distributed.html#launch-utility
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--local_rank", type=int)
+args = parser.parse_args()
+print(f"THIS IS ARGS {args}")
+
+# torch.cuda.set_device(arg.local_rank)
 # In[5]:
 
 
-DATA_PATH = Path("/datadisk/data")
+DATA_PATH = Path("/workdir/Code/bma_transformer_model/data")
 
 # DATA_RAW_PATH = DATA_PATH/"raw"
-DATA_RAW_EXTRACTED_PATH = DATA_PATH/"raw_data_extraction_v2"
+DATA_RAW_EXTRACTED_PATH = DATA_PATH/"raw_data_extraction"
 
 # Output is in bytes - helper from Pathlib Path https://stackoverflow.com/questions/2104080/how-can-i-check-file-size-in-python
 def getStat(prev_value, cur_value):
@@ -106,7 +114,7 @@ model = BertForMaskedLM(config=configuration)
 # model = RobertaForMaskedLM.from_pretrained('./Roberta/checkpoint-200000')
 
 # Accessing the model configuration
-model.config
+# model.config
 
 # # Initializing Tokenizer
 
@@ -140,7 +148,7 @@ print(f"Running on Fastai version: {fastai.__version__}")
 
 with open(TOK_PATH/"bert_itos_80k_cleaned.pkl", 'rb') as f:
     itos = pickle.load(f)
-len(itos)
+# len(itos)
 
 
 # In[16]:
@@ -149,18 +157,14 @@ len(itos)
 vocab = Vocab(itos)
 
 
-# In[17]:
-pyThai_tt = ThaiTokenizer()
-
-
 # In[18]:
 
 
-tt = Tokenizer(tok_func = ThaiTokenizer, lang = 'th', pre_rules = pre_rules_th, post_rules=post_rules_th, n_cpus=1)
-test_sample = tt._process_all_1([text[:100]])
-print(test_sample)
-test_sample = [vocab.numericalize(seq) for seq in test_sample]
-print(test_sample)
+# tt = Tokenizer(tok_func = ThaiTokenizer, lang = 'th', pre_rules = pre_rules_th, post_rules=post_rules_th, n_cpus=1)
+# test_sample = tt._process_all_1([text[:100]])
+# print(test_sample)
+# test_sample = [vocab.numericalize(seq) for seq in test_sample]
+# print(test_sample)
 
 
 
@@ -367,9 +371,9 @@ dataset = TextDatasetParallel(tokenizer,
                               sample_path=list(map(str, ALL_FILES)), 
 #                               sample_path=list(map(str, GURU_CRAWLER_FILES)), 
                               block_size=512, 
-                              cached_directory= "/workdir/cached_data_senior",
+                              cached_directory= "/workdir/Code/bma_transformer_model/data/cached_data_senior",
                               overwrite_cache=False, # make sure this is false when you have cache!!
-                              num_processes=60,
+                              num_processes=8,
                              )
 
 # In[45]:
@@ -413,12 +417,19 @@ data_collator = DataCollatorForLanguageModeling(
 
 from transformers import Trainer, TrainingArguments
 
+# For Distributed Run (see https://pytorch.org/docs/stable/distributed.html#launch-utility):
+#    python -m torch.distributed.launch --nproc_per_node=2 --nnodes=1 --node_rank=0 --master_addr="192.168.11.36" --master_port=1234 runGuru_pretrain_originalBert.py
+#    OR
+#    python -m torch.distributed.launch --nproc_per_node=2 runGuru_pretrain_originalBert.py
+
 training_args = TrainingArguments(
-    output_dir="./OriginalBert2",
+    output_dir="./OriginalBert",
     overwrite_output_dir=False,  #"Use this to continue training if output_dir points to a checkpoint directory."
     
     fp16=True,
-    fp16_opt_level='O1',
+    fp16_opt_level='O3',
+    
+    local_rank=args.local_rank, # FOR DISTRIBUTED TRAINING!! EXPERIMENTAL
     
     
     do_train=True, #Whether to run training.
@@ -428,7 +439,7 @@ training_args = TrainingArguments(
     num_train_epochs=200, # Total number of training epochs to perform.
     
     
-    per_device_train_batch_size=5, # Batch size per GPU/TPU core/CPU for training.
+    per_device_train_batch_size=6, # Batch size per GPU/TPU core/CPU for training.
 #     per_device_eval_batch_size=256, # Batch size per GPU/TPU core/CPU for evaluation.
     
     learning_rate=5e-5,  #The initial learning rate for Adam.
