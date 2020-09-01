@@ -427,7 +427,7 @@ training_args = TrainingArguments(
     overwrite_output_dir=False,  #"Use this to continue training if output_dir points to a checkpoint directory."
     
     fp16=True,
-    fp16_opt_level='O3',
+    fp16_opt_level='O2',
     
     local_rank=args.local_rank, # FOR DISTRIBUTED TRAINING!! EXPERIMENTAL
     
@@ -439,7 +439,7 @@ training_args = TrainingArguments(
     num_train_epochs=200, # Total number of training epochs to perform.
     
     
-    per_device_train_batch_size=6, # Batch size per GPU/TPU core/CPU for training.
+    per_device_train_batch_size=5, # Batch size per GPU/TPU core/CPU for training.
 #     per_device_eval_batch_size=256, # Batch size per GPU/TPU core/CPU for evaluation.
     
     learning_rate=5e-5,  #The initial learning rate for Adam.
